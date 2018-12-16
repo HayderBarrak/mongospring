@@ -22,6 +22,11 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
+        <!--set this to your docker acct name-->
+        <docker.image.prefix>hayder94</docker.image.prefix>
+
+        <!--Set to name of project-->
+        <docker.image.name>springbootmongo</docker.image.name>
 	</properties>
 
 	<dependencies>
@@ -50,6 +55,58 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.20.0</version>
+				<configuration>
+					<dockerHost>unix:///var/run/docker.sock</dockerHost>
+					<verbose>true</verbose>
+					<images>
+						<image>
+							<name>${docker.image.prefix}/${docker.image.name}</name>
+							<build>
+								<dockerFileDir>${project.basedir}/src/main/docker/</dockerFileDir>
+
+								<!--copies artficact to docker build dir in target-->
+								<assembly>
+									<descriptorRef>artifact</descriptorRef>
+								</assembly>
+								<tags>
+									<tag>latest</tag>
+									<tag>${project.version}</tag>
+								</tags>
+							</build>
+							<run>
+								<ports>
+									<port>8080:8080</port>
+								</ports>
+								<dependsOn>
+									<container>mongo</container>
+								</dependsOn>
+								<links>
+									<link>mongo</link>
+								</links>
+							</run>
+						</image>
+						<!--mongo container-->
+						<image>
+							<name>mongo</name>
+							<alias>mongo</alias>
+							<run>
+								<ports>
+								<!--expose port for dn-->
+								<port>27017:27017</port>
+								</ports>
+								<!--wait for db to start-->
+								<wait>
+									<time>10000</time>
+								</wait>
+							</run>
+						</image>
+					</images>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

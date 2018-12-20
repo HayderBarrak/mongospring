@@ -1,0 +1,16 @@
+  version: '3'
+
+  services:
+    springbootmongodb:
+        image: hayder94/springbootmongo
+        ports:
+         - '8080:8080'
+        volumes:
+         - /home/hayder/dockerdata:/data/db
+        restart: always
+        depends_on:
+         - mongo
+
+
+    mongo:
+      image: mongo
